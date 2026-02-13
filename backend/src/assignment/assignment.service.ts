@@ -16,7 +16,7 @@ export class AssignmentService {
     }
 
     async findAll(): Promise<Assignment[]> {
-        return this.assignmentModel.find().exec();
+        return this.assignmentModel.find().populate('userId').populate('caseId').populate('assignedBy').exec();
     }
 
     async findOne(id: string): Promise<Assignment> {

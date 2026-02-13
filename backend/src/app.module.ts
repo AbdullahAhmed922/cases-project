@@ -8,7 +8,11 @@ import { UserModule } from './user/user.module';
 import { CaseModule } from './case/case.module';
 import { JudgeModule } from './judge/judge.module';
 import { AssignmentModule } from './assignment/assignment.module';
-
+import { UserRolesController } from './user-roles/user-roles.controller';
+import { AdminRolesController } from './admin-roles/admin-roles.controller';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './guards/roles/roles.guard';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -19,8 +23,15 @@ import { AssignmentModule } from './assignment/assignment.module';
     CaseModule,
     JudgeModule,
     AssignmentModule,
+    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, UserRolesController, AdminRolesController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
+    },
+  ],
 })
 export class AppModule { }

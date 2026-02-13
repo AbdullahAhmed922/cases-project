@@ -8,14 +8,17 @@ export type UserDocument = User & Document;
 export class User {
   @Prop({ required: true })
   name: string;
-
+  
   @Prop({ required: true, unique: true })
   email: string;
 
   @Prop()
+  password: string;
+
+  @Prop()
   phone: string;
 
-  @Prop({ required: true })
+  @Prop({ enum: ['admin', 'judge', 'user'], default: 'user' })
   role: string;
 }
 

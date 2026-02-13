@@ -18,6 +18,16 @@ export interface Case {
     updatedAt?: string;
 }
 
+export interface Judge {
+    _id: string;
+    judgeName: string;
+    caseType: string;
+    description: string;
+    status: string;
+    userId: string | User;
+    createdAt?: string;
+    updatedAt?: string;
+}
 export interface Assignment {
     _id: string;
     caseId: string | Case;

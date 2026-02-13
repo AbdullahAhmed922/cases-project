@@ -1,54 +1,58 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus, Trash2, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
 import { Assignment, Case, User } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AssignmentsPage() {
-    const [assignments, setAssignments] = useState<Assignment[]>([]);
-    const [cases, setCases] = useState<Case[]>([]);
-    const [judges, setJudges] = useState<User[]>([]);
     const [selectedCase, setSelectedCase] = useState("");
-    const [selectedJudge, setSelectedJudge] = useState("");
-    const [loading, setLoading] = useState(true);
+    const [selectedUser, setSelectedUser] = useState("");
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [assignmentsData, casesData, usersData] = await Promise.all([
-                    api.get<Assignment[]>("/assignment"),
-                    api.get<Case[]>("/case"),
-                    api.get<User[]>("/user"),
-                ]);
+    const fetchData = async () => {
+        const [assignmentsData, casesData, usersData] = await Promise.all([
+            api.get<Assignment[]>("/assignment"),
+            api.get<Case[]>("/case"),
+            api.get<User[]>("/user"),
+        ]);
+        return { assignmentsData, casesData, usersData }
+    };
 
-                setAssignments(assignmentsData);
-                setCases(casesData);
-                setJudges(usersData.filter(u => u.role === 'judge'));
-            } catch (error) {
-                console.error("Failed to fetch data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const { data, isLoading, isError, error, refetch } = useQuery({
+        queryKey: ["assignments", "cases", "users"],
+        queryFn: fetchData,
+        staleTime: 300000
+    })
 
-        fetchData();
-    }, []);
+    const assignments = data?.assignmentsData ?? [];
+    const cases = data?.casesData ?? [];
+    const users = data?.usersData ?? [];
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (isError) {
+        const errorMessage = error instanceof Error ? error.message : "Failed to load data";
+        return <div>{errorMessage}</div>;
+    }
 
     const handleAssign = async () => {
-        if (!selectedCase || !selectedJudge) return;
+        if (!selectedCase || !selectedUser) return;
 
         try {
-            const newAssignment = await api.post<Assignment, { caseId: string; userId: string }>("/assignment", {
+            await api.post<Assignment, { caseId: string; userId: string }>("/assignment", {
                 caseId: selectedCase,
-                userId: selectedJudge,
+                userId: selectedUser,
             });
-            setAssignments([...assignments, newAssignment]);
+
             setSelectedCase("");
-            setSelectedJudge("");
+            setSelectedUser("");
+            refetch();
         } catch (error) {
             console.error("Failed to create assignment:", error);
             alert("Failed to create assignment. Please try again.");
@@ -58,7 +62,7 @@ export default function AssignmentsPage() {
     const handleRemove = async (id: string) => {
         try {
             await api.delete(`/assignment/${id}`);
-            setAssignments(assignments.filter(a => a._id !== id));
+            refetch();
         } catch (error) {
             console.error("Failed to delete assignment:", error);
         }
@@ -66,22 +70,25 @@ export default function AssignmentsPage() {
 
     const renderAssignment = (assignment: Assignment) => {
         const caseObj = typeof assignment.caseId === 'object' ? assignment.caseId : cases.find(c => c._id === assignment.caseId);
-        const judgeObj = typeof assignment.userId === 'object' ? assignment.userId : judges.find(j => j._id === assignment.userId);
-
+        const userObj = typeof assignment.userId === 'object' ? assignment.userId : users.find(u => u._id === assignment.userId);
 
         const caseTitle = caseObj ? caseObj.caseTitle : "Unknown Case";
-        const judgeName = judgeObj ? judgeObj.name : "Unknown Judge";
-        const judgeInitial = judgeName.charAt(0);
+        const userName = userObj ? userObj.name : "Unknown User";
+        const userRole = userObj ? userObj.role : "";
+        const userInitial = userName.charAt(0);
 
         return (
             <div key={assignment._id} className="flex items-center justify-between p-4 border border-border/50 rounded-xl bg-white/50 dark:bg-slate-800/50 hover:bg-white/70 dark:hover:bg-slate-800/80 transition-all duration-200 group">
                 <div className="flex items-center gap-3 flex-1">
-                    <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold flex-shrink-0">
-                        {judgeInitial}
+                    <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold shrink-0">
+                        {userInitial}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{judgeName}</p>
-                        <p className="text-xs text-muted-foreground truncate">Case: {caseTitle}</p>
+                        <p className="font-medium truncate">{userName}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-xs text-muted-foreground truncate">Case: {caseTitle}</p>
+                            {userRole && <Badge variant="outline" className="text-[10px] capitalize">{userRole}</Badge>}
+                        </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 ml-2">
@@ -110,7 +117,7 @@ export default function AssignmentsPage() {
             <div className="flex items-start justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Case Assignments</h2>
-                    <p className="text-muted-foreground">Link judges to cases efficiently.</p>
+                    <p className="text-muted-foreground">Link users to cases efficiently.</p>
                 </div>
                 <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur">
                     <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -124,7 +131,7 @@ export default function AssignmentsPage() {
                         <CardTitle className="flex items-center gap-2">
                             <Plus className="h-4 w-4" /> New Assignment
                         </CardTitle>
-                        <CardDescription>Link a Judge to a Case</CardDescription>
+                        <CardDescription>Assign a User to a Case</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
@@ -141,22 +148,22 @@ export default function AssignmentsPage() {
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Select Judge</label>
+                            <label className="text-sm font-medium">Select User</label>
                             <select
-                                value={selectedJudge}
-                                onChange={(e) => setSelectedJudge(e.target.value)}
+                                value={selectedUser}
+                                onChange={(e) => setSelectedUser(e.target.value)}
                                 className="flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                <option value="">Choose a judge...</option>
-                                {judges.map(j => (
-                                    <option key={j._id} value={j._id}>{j.name}</option>
+                                <option value="">Choose a user...</option>
+                                {users.filter(u => u.role === "judge" || u.role === "user").map(u => (
+                                    <option key={u._id} value={u._id}>{u.name} ({u.role})</option>
                                 ))}
                             </select>
                         </div>
                         <Button
                             className="w-full mt-4 bg-primary hover:bg-primary/90"
                             onClick={handleAssign}
-                            disabled={!selectedCase || !selectedJudge}
+                            disabled={!selectedCase || !selectedUser}
                         >
                             <CheckCircle className="mr-2 h-4 w-4" /> Assign Now
                         </Button>
@@ -169,7 +176,7 @@ export default function AssignmentsPage() {
                         <CardDescription>{assignments.length} total assignments</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {loading ? (
+                        {isLoading ? (
                             <div className="space-y-3">
                                 {[1, 2, 3].map(i => <div key={i} className="h-20 bg-muted/50 rounded-xl animate-pulse" />)}
                             </div>
