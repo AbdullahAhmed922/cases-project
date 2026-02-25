@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsMongoId, IsOptional } from 'class-validator';
+import { IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class UpdateAssignmentDto {
     @IsMongoId()
@@ -8,5 +8,13 @@ export class UpdateAssignmentDto {
 
     @IsMongoId()
     @IsOptional()
-    judgeId?: string;
+    assignedBy?: string;
+
+    @IsString()
+    @IsOptional()
+    status?: string;
+
+    @IsString()
+    @IsOptional()
+    notes?: string;
 }

@@ -35,7 +35,7 @@ export default function CasesPage() {
     //     fetchCases();
     // }, []);
 
-    const { data = [], isLoading, isError, error, isFetching } = useQuery<Case[]>({
+    const { data = [], isLoading, isError, error } = useQuery<Case[]>({
         queryKey: ["cases"],
         queryFn: fetchCases,
         staleTime: 300000
@@ -58,8 +58,6 @@ export default function CasesPage() {
             })
         }
     });
-
-    console.log({ data, isLoading, isError, error, isFetching });
 
     const handleStatusChange = useMutation<Case, Error, { caseId: string, newStatus: string }>({
         mutationFn: ({ caseId, newStatus }: { caseId: string, newStatus: string }) => api.patch<Case>(`/case/${caseId}`, { status: newStatus }),

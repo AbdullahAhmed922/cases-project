@@ -22,7 +22,6 @@ export const Modal = ({
     description,
     className,
 }: ModalProps) => {
-    // Prevent scrolling when modal is open
     React.useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
@@ -55,7 +54,7 @@ export const Modal = ({
                         transition={{ duration: 0.2 }}
                         className={cn(
                             "fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg md:w-full",
-                            "border-white/10 bg-[#0f172a] text-slate-100", // Dark mode default styling to match dashboard
+                            "border-white/10 bg-[#0f172a] text-slate-100",
                             className
                         )}
                     >

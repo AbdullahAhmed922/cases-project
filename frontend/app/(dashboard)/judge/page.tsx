@@ -17,9 +17,7 @@ export default function JudgePage() {
         queryFn: fetchUsers,
         staleTime: 300000
     });
-    console.log("All Users:", allUsers);
     const judges = allUsers.filter((u) => u.role === "judge");
-    console.log("Filtered Judges:" , judges);
     const filteredJudges = judges.filter((judge) => {
         const q = searchQuery.toLowerCase();
         return (

@@ -12,29 +12,31 @@ export class JudgeService {
 
     async create(createJudgeDto: CreateJudgeDto): Promise<Judge> {
         const judge = new this.judgeModel(createJudgeDto);
-        
         return judge.save();
     }
-
     
     async findAll(): Promise<Judge[]> {
         return this.judgeModel.find().populate('userId').exec();
     }
+    
     async findOne(id: string):Promise<Judge> {
         const judge = await this.judgeModel.findById(id).populate('userId').exec();
         if(!judge) throw new NotFoundException('Judge not found');
         return judge;
     }
+    
     async update(id: string, createJudgeDto: CreateJudgeDto): Promise<Judge> {
         const updatedJudge = await this.judgeModel.findByIdAndUpdate(id, createJudgeDto, { new: true }).populate('userId').exec();
         if(!updatedJudge) throw new NotFoundException('Judge not found');
         return updatedJudge;
     }
+
     async patch(id: string, createJudgeDto: CreateJudgeDto): Promise<Judge> {   
         const patchedJudge = await this.judgeModel.findByIdAndUpdate(id, createJudgeDto, { new: true }).populate('userId').exec();
         if(!patchedJudge) throw new NotFoundException('Judge not found');
         return patchedJudge;
     }
+
     async remove(id: string): Promise<Judge> {
         const deletedJudge = await this.judgeModel.findByIdAndDelete(id).populate('userId').exec();
         if(!deletedJudge) throw new NotFoundException('Judge not found');

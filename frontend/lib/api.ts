@@ -66,8 +66,8 @@ export const api = {
         }),
 };
 
-export const fetchCases = async ():Promise<Case[]> => api.get<Case[]>("/case");
+export const fetchCases = async (): Promise<Case[]> => api.get<Case[]>("/case");
 
-export const fetchUsers = async ():Promise<User[]> => api.get<User[]>("/user");
+export const fetchUsers = async (): Promise<User[]> => api.get<User[]>("/user");
 
-export const fetchAssignment = async ():Promise<Assignment[]> => api.get<Assignment[]>("/assignment");
+export const fetchAssignment = async (): Promise<Assignment[]> => api.get<Assignment[]>("/assignment");

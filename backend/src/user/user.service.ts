@@ -6,7 +6,7 @@ import { User, UserDocument } from './user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Judge, JudgeDocument } from '../judge/judge.schema';
 import { Assignment, AssignmentDocument } from '../assignment/assignment.schema';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(
@@ -15,8 +15,10 @@ export class UsersService {
     @InjectModel(Assignment.name) private assignmentModel: Model<AssignmentDocument>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = new this.userModel(createUserDto);
+  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const user = new this.userModel({ ...createUserDto, password: hashedPassword });
+   
     if (createUserDto.role === 'judge') {
       await this.judgeModel.create({ 
         userId: user._id,

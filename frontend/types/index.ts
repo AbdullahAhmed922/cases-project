@@ -36,7 +36,7 @@ export interface Assignment {
 }
 
 
-export type CreateUserDto = Omit<User, '_id' | 'createdAt' | 'updatedAt'>;
+export type CreateUserDto = Omit<User, '_id' | 'createdAt' | 'updatedAt'> & { password: string};
 export type CreateCaseDto = Omit<Case, '_id' | 'createdAt' | 'updatedAt'>;
 export type CreateAssignmentDto = {
     caseId: string;

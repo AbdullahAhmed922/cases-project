@@ -13,8 +13,9 @@ import { AdminRolesController } from './admin-roles/admin-roles.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles/roles.guard';
 import { AuthModule } from './auth/auth.module';
-
-
+import { AuthGuard } from '@nestjs/passport';
+import { Reflector } from '@nestjs/core';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -30,7 +31,7 @@ import { AuthModule } from './auth/auth.module';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
+      useClass: JwtAuthGuard
     },
   ],
 })

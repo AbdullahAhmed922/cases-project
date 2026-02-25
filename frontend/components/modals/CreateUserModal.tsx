@@ -16,6 +16,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSubmit }: CreateUserModalPr
     const [formData, setFormData] = useState<CreateUserDto>({
         name: "",
         email: "",
+        password: "",
         role: "user",
         phone: "",
     });
@@ -29,7 +30,7 @@ export const CreateUserModal = ({ isOpen, onClose, onSubmit }: CreateUserModalPr
         e.preventDefault();
         onSubmit(formData);
         onClose();
-        setFormData({ name: "", email: "", role: "user", phone: "" }); 
+        setFormData({ name: "", email: "", password: "", role: "user", phone: "" }); 
     };
 
     return (
@@ -61,6 +62,19 @@ export const CreateUserModal = ({ isOpen, onClose, onSubmit }: CreateUserModalPr
                         required
                     />
                 </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">Password</label>
+                    <Input
+                        name="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Enter password"
+                        required
+                    />
+                </div>
+
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Role</label>
                     <select

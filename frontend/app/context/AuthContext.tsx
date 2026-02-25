@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 interface AuthUser {
     userId: string;
@@ -44,8 +45,8 @@ function isTokenExpired(token: string): boolean {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<AuthUser | null>(null);
-    const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<AuthUser | null> (null);
+    const [token, setToken] = useState<string | null> (null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
@@ -54,15 +55,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (storedToken && !isTokenExpired(storedToken)) {
             const decoded = decodeToken(storedToken);
             if (decoded) {
+                React.startTransition(()=>{
                 setToken(storedToken);
                 setUser(decoded);
+                setIsLoading(false);
+            })
             } else {
                 localStorage.removeItem("token");
+                React.startTransition(() => {
+                    setIsLoading(false);
+                });
             }
         } else if (storedToken) {
             localStorage.removeItem("token");
+            React.startTransition(() => {
+                setIsLoading(false);
+            });
+        } else {
+            React.startTransition(() => {
+                setIsLoading(false);
+            });
         }
-        setIsLoading(false);
     }, []);
 
     const login = useCallback((newToken: string) => {
