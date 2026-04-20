@@ -8,18 +8,22 @@ type BadgeProps = React.HTMLAttributes<HTMLSpanElement> & {
 const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     ({ className, variant = "default", ...props }, ref) => {
         const variants = {
-            default: "bg-secondary text-secondary-foreground",
-            success: "bg-green-500 text-white rounded-lg px-2",
-            error: "bg-red-500 text-white rounded-lg px-2",
-            warning: "bg-yellow-500 text-white rounded-lg px-2",
-            info: "bg-blue-500 text-white rounded-lg px-2",
-            outline: "bg-red-500 border border-input rounded-lg px-2 text-foreground",
+            default: "bg-primary/10 text-primary border border-primary/20 rounded-lg px-2",
+            success: "bg-emerald-50 text-emerald-700 border border-emerald-200/50 rounded-lg px-2",
+            error: "bg-red-50 text-red-700 border border-red-200/50 rounded-lg px-2",
+            warning: "bg-amber-50 text-amber-700 border border-amber-200/50 rounded-lg px-2",
+            info: "bg-blue-50 text-blue-700 border border-blue-200/50 rounded-lg px-2",
+            outline: "bg-transparent border border-border text-muted-foreground rounded-lg px-2",
         };
 
         return (
             <span
                 ref={ref}
-                className={cn(variants[variant], className)}
+                className={cn(
+                    "inline-flex items-center text-xs font-medium py-0.5",
+                    variants[variant],
+                    className
+                )}
                 {...props}
             />
         );

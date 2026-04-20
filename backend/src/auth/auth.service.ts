@@ -16,11 +16,10 @@ export class AuthService {
             throw new ConflictException('Email already in use');
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
         const user = await this.userService.create({
             name,
             email,
-            password: hashedPassword,
+            password,
             role,
             phone: phone || '',
         })

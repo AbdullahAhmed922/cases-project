@@ -11,12 +11,12 @@ export default function DashboardLayout({
 }) {
     return (
             <PrivateRoute>
-                <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-80 bg-[#0b1223] text-slate-100 border-r border-white/5">
+                <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-80">
                     <Sidebar />
                 </div>
-                <main className="md:pl-72 h-full app-surface overflow-hidden">
+                <main className="md:pl-72 h-full bg-background overflow-hidden">
                     <Header />
-                    <div className="p-8 h-[calc(100vh-4rem)] overflow-y-auto">
+                    <div className="p-8 h-[calc(100vh-4rem)] overflow-y-auto main-content-scroll">
                         {children}
                         <ReactQueryDevtools initialIsOpen={false} />
                     </div>

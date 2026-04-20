@@ -7,6 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { Judge, JudgeDocument } from '../judge/judge.schema';
 import { Assignment, AssignmentDocument } from '../assignment/assignment.schema';
 import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class UsersService {
   constructor(

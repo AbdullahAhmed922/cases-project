@@ -78,7 +78,7 @@ export default function AssignmentsPage() {
         const userInitial = userName.charAt(0);
 
         return (
-            <div key={assignment._id} className="flex items-center justify-between p-4 border border-border/50 rounded-xl bg-white/50 dark:bg-slate-800/50 hover:bg-white/70 dark:hover:bg-slate-800/80 transition-all duration-200 group">
+            <div key={assignment._id} className="flex items-center justify-between p-4 border border-border/50 rounded-xl bg-white/50 hover:bg-white/70 transition-all duration-200 group">
                 <div className="flex items-center gap-3 flex-1">
                     <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold shrink-0">
                         {userInitial}

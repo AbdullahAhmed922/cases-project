@@ -1,37 +1,80 @@
 @import "tailwindcss";
 
+/* Override Tailwind v4 dark mode: use .dark class instead of prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── AUC Law Design System ─── */
+
+/* Light theme (default) */
 :root {
-  /* Base Colors - Zinc/Slate for neutral premium feel */
-  --background: #10141b; /* Slate 50 */
-  --foreground: #0e121a; /* Slate 900 */
-  
-  /* Primary Brand Colors - Indigo/Violet */
-  --primary: #4f46e5; /* Indigo 600 */
-  --primary-foreground: #ffffff;
-  
-  /* Surface Colors */
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #1e2433;
+
   --card: #ffffff;
-  --card-foreground: #1e293b; /* Slate 800 */
+  --card-foreground: #1e2433;
+
   --popover: #ffffff;
-  --popover-foreground: #1e293b;
-  
-  /* Accents */
-  --muted: #f1f5f9; /* Slate 100 */
-  --muted-foreground: #64748b; /* Slate 500 */
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  
-  /* States */
-  --destructive: #ef4444; /* Red 500 */
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0; /* Slate 200 */
-  --input: #e2e8f0;
-  --ring: #4f46e5;
-  
-  /* Radii */
+  --popover-foreground: #1e2433;
+
+  --primary: #1565c0;
+  --primary-foreground: #fafafa;
+
+  --secondary: #f1f3f9;
+  --secondary-foreground: #1e2433;
+
+  --muted: #f1f3f9;
+  --muted-foreground: #6b7280;
+
+  --accent: #f1f3f9;
+  --accent-foreground: #1e2433;
+
+  --destructive: #e53935;
+  --destructive-foreground: #fafafa;
+
+  --border: #e2e5ed;
+  --input: #e2e5ed;
+  --ring: #1565c0;
+
   --radius: 0.75rem;
+
+  /* Sidebar */
+  --sidebar-background: #f9fafb;
+  --sidebar-foreground: #1e2433;
+  --sidebar-primary: #1565c0;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f1f3f9;
+  --sidebar-accent-foreground: #1e2433;
+  --sidebar-border: #e2e5ed;
+  --sidebar-ring: #1565c0;
+
+  /* AUC Law Brand Colors */
+  --auc-blue-50: #eff6ff;
+  --auc-blue-100: #dbeafe;
+  --auc-blue-200: #bfdbfe;
+  --auc-blue-300: #93c5fd;
+  --auc-blue-400: #60a5fa;
+  --auc-blue-500: #3b82f6;
+  --auc-blue-600: #1565c0;
+  --auc-blue-700: #1255a3;
+  --auc-blue-800: #0f4587;
+  --auc-blue-900: #0c356b;
+
+  --auc-gold-50: #fffbeb;
+  --auc-gold-100: #fef3c7;
+  --auc-gold-200: #fde68a;
+  --auc-gold-300: #fcd34d;
+  --auc-gold-400: #fbbf24;
+  --auc-gold-500: #f59e0b;
+  --auc-gold-600: #d97706;
+  --auc-gold-700: #b45309;
+  --auc-gold-800: #92400e;
+  --auc-gold-900: #78350f;
 }
 
+
+
+/* ─── Tailwind v4 Theme Mapping ─── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -50,14 +93,19 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  
+
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
-  
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-scale-in: scale-in 0.2s ease-out;
+
   @keyframes accordion-down {
     from { height: 0; }
     to { height: var(--radix-accordion-content-height); }
@@ -66,49 +114,188 @@
     from { height: var(--radix-accordion-content-height); }
     to { height: 0; }
   }
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scale-in {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617; /* Slate 950 */
-    --foreground: #f8fafc; /* Slate 50 */
-    
-    --primary: #6366f1; /* Indigo 500 */
-    --primary-foreground: #ffffff;
-    
-    --card: #0f172a; /* Slate 900 */
-    --card-foreground: #f8fafc;
-    --popover: #0f172a;
-    --popover-foreground: #f8fafc;
-    
-    --muted: #1e293b; /* Slate 800 */
-    --muted-foreground: #94a3b8; /* Slate 400 */
-    --accent: #1e293b;
-    --accent-foreground: #f8fafc;
-    
-    --destructive: #7f1d1d; /* Red 900 */
-    --destructive-foreground: #f8fafc;
-    --border: #1e293b;
-    --input: #1e293b;
-    --ring: #6366f1;
-  }
+/* ─── Base Styles ─── */
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-space-grotesk), var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Glassmorphism Utilities */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* ─── Component Utilities ─── */
+
+/* Glassmorphism */
 .glass {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .dark .glass {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(19, 24, 32, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-dark {
+  background: rgba(13, 16, 23, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(34, 44, 60, 0.2);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(to right, var(--auc-blue-600), var(--auc-gold-600));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card Hover */
+.card-hover {
+  transition: all 0.3s ease;
+}
+.card-hover:hover {
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
+}
+
+/* Nav Link Styles */
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-link-active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.nav-link-inactive {
+  color: var(--muted-foreground);
+}
+.nav-link-inactive:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+/* Dashboard card & accent bar */
+.dashboard-card {
+  background: var(--card);
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.section-accent-bar {
+  width: 0.25rem;
+  border-radius: 9999px;
+  background: #7c3aed;
+  flex-shrink: 0;
+}
+
+.section-accent-bar-pink {
+  width: 0.25rem;
+  border-radius: 9999px;
+  background: #ec4899;
+  flex-shrink: 0;
+}
+
+.btn-primary-gradient {
+  background: linear-gradient(to right, #7c3aed, #ec4899);
+  color: #fff;
+}
+.btn-primary-gradient:hover {
+  opacity: 0.9;
+}
+
+/* ─── Custom Scrollbars ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.5);
+}
+
+/* Main content area scrollbar */
+.main-content-scroll {
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+.main-content-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.main-content-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.main-content-scroll::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.25);
+  border-radius: 3px;
+}
+.main-content-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.45);
+}
+
+/* Dashboard inner sections */
+.dashboard-inner-scroll {
+  scrollbar-width: thin;
+}
+.dashboard-inner-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.dashboard-inner-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dashboard-inner-scroll::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.2);
+  border-radius: 2px;
+}
+.dashboard-inner-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.35);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1024px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }

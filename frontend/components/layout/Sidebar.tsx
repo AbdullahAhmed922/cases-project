@@ -10,63 +10,93 @@ const routes = [
         label: "Dashboard",
         icon: LayoutDashboard,
         href: "/",
-        color: "text-sky-500",
     },
     {
         label: "Cases",
         icon: Briefcase,
         href: "/cases",
-        color: "text-violet-500",
     },
     {
         label: "Assignments",
         icon: FileText,
         href: "/assignments",
-        color: "text-pink-700",
     },
     {
         label: "Users",
         icon: Users,
         href: "/users",
-        color: "text-orange-700",
     },
     {
         label: "Judge",
         icon: Scale,
         href: "/judge",
-        color: "text-emerald-500",
     },
 ];
 
 export function Sidebar() {
     const pathname = usePathname();
 
+    const isActive = (href: string) => pathname === href;
+
     return (
-        <div className="space-y-4 py-4 flex flex-col h-full bg-gradient-to-b from-[#0b1223] via-[#0b1223] to-[#0f172a] text-slate-100">
-            <div className="px-3 py-2 flex-1">
-                <Link href="/" className="flex items-center pl-3 mb-10">
-                    <h1 className="text-2xl font-bold tracking-tight">
+        <div className="flex flex-col h-full bg-white border-r border-slate-100 overflow-hidden">
+            {/* Logo */}
+            <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100/80">
+                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-200/50">
+                    <span className="text-white font-bold text-sm">CM</span>
+                </div>
+                <div>
+                    <span className="font-bold text-base text-slate-800">
                         Case<span className="text-primary">Manager</span>
-                    </h1>
-                </Link>
-                <div className="space-y-1">
-                    {routes.map((route) => (
-                        <Link
-                            key={route.href}
-                            href={route.href}
-                            className={cn(
-                                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer rounded-lg transition border border-transparent hover:border-white/10 hover:bg-white/5",
-                                pathname === route.href ? "text-white bg-white/10 border-white/10 shadow-[0_10px_40px_rgba(14,165,233,0.12)]" : "text-slate-300"
-                            )}
-                        >
-                            <div className="flex items-center flex-1">
-                                <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
-                                {route.label}
-                            </div>
-                        </Link>
-                    ))}
+                    </span>
+                    <p className="text-[10px] font-medium text-slate-400">Legal Management</p>
                 </div>
             </div>
-        </div>  
+
+            {/* Navigation */}
+            <div className="flex-grow flex flex-col min-h-0 py-4">
+                <div className="mb-3 px-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3">
+                        Navigation
+                    </p>
+                </div>
+                <nav className="space-y-0.5 px-3">
+                    {routes.map((route) => {
+                        const active = isActive(route.href);
+                        return (
+                            <Link
+                                key={route.href}
+                                href={route.href}
+                                className={cn(
+                                    "group flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-200",
+                                    active
+                                        ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-200/50"
+                                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                                )}
+                            >
+                                <div
+                                    className={cn(
+                                        "flex items-center justify-center w-7 h-7 rounded-lg transition-colors",
+                                        active
+                                            ? "bg-white/20"
+                                            : "bg-slate-100 group-hover:bg-slate-200/70"
+                                    )}
+                                >
+                                    <route.icon className="h-3.5 w-3.5" />
+                                </div>
+                                <span className="flex-1">{route.label}</span>
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </div>
+
+            {/* Footer */}
+            <div className="flex-shrink-0 px-5 py-4 border-t border-slate-100">
+                <p className="text-[10px] text-slate-400 text-center">
+                    © 2024 CaseManager
+                </p>
+            </div>
+        </div>
     );
 }
