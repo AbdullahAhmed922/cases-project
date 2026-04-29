@@ -19,6 +19,16 @@ export class AssignmentService {
         return this.assignmentModel.find().populate('userId').populate('caseId').populate('assignedBy').exec();
     }
 
+    async findByUserId(userId: string): Promise<Assignment[]> {
+        const filter: any = {
+            $or: [
+                { userId: userId },
+                { userId: new Types.ObjectId(userId) },
+            ]
+        };
+        return this.assignmentModel.find(filter).populate('userId').populate('caseId').populate('assignedBy').exec();
+    }
+
     async findOne(id: string): Promise<Assignment> {
         if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Assignment not found');
         const assignment = await this.assignmentModel.findById(id).exec();

@@ -5,10 +5,14 @@ import { Model, Types } from 'mongoose';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { Case, CaseDocument } from './case.schema';
 import { UpdateCaseDto } from './dto/update-case.dto';
+import { Assignment, AssignmentDocument } from '../assignment/assignment.schema';
 
 @Injectable()
 export class CaseService {
-    constructor(@InjectModel(Case.name) private readonly caseModel: Model<CaseDocument>,) { }
+    constructor(
+        @InjectModel(Case.name) private readonly caseModel: Model<CaseDocument>,
+        @InjectModel(Assignment.name) private readonly assignmentModel: Model<AssignmentDocument>,
+    ) { }
 
     async create(createCaseDto: CreateCaseDto): Promise<Case> {
         const create = new this.caseModel(createCaseDto)
@@ -17,6 +21,24 @@ export class CaseService {
 
     async findAll(): Promise<Case[]> {
         return this.caseModel.find().exec();
+    }
+
+    async findByUserId(userId: string): Promise<Case[]> {
+        // userId/caseId may be stored as strings or ObjectIds in assignments collection
+        const filter: any = {
+            $or: [
+                { userId: userId },
+                { userId: new Types.ObjectId(userId) },
+            ]
+        };
+        const assignments = await this.assignmentModel.find(filter).exec();
+        // Convert caseIds to ObjectIds (they may be stored as strings)
+        const caseIds = assignments.map(a => {
+            const id = String(a.caseId);
+            return new Types.ObjectId(id);
+        });
+        if (caseIds.length === 0) return [];
+        return this.caseModel.find({ _id: { $in: caseIds } }).exec();
     }
 
     async findOne(id: string): Promise<Case> {

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Param, Patch, Post, Delete, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Delete, Req, UseGuards } from '@nestjs/common';
 import { AssignmentService } from './assignment.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { UpdateAssignmentDto } from './dto/update-assingment.dto';
@@ -19,9 +19,16 @@ export class AssignmentController {
   }
 
   @Get()
-  @Roles(ROLE.ADMIN, ROLE.JUDGE, ROLE.USER)
+  @Roles(ROLE.ADMIN, ROLE.JUDGE)
   findAll() {
     return this.assignmentService.findAll();
+  }
+
+  @Get('my-assignments')
+  @Roles(ROLE.USER)
+  findMyAssignments(@Req() req: any) {
+    const user = req.user as { userId: string; email: string; role: string };
+    return this.assignmentService.findByUserId(user.userId);
   }
 
   @Get(':id')

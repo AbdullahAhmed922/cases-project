@@ -8,12 +8,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { api } from "@/lib/api";
 import { Assignment, Case, User } from "@/types";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/app/context/AuthContext";
+import { PrivateRoute } from "@/components/privateRoute";
 
 export default function AssignmentsPage() {
+    const { user } = useAuth();
     const [selectedCase, setSelectedCase] = useState("");
     const [selectedUser, setSelectedUser] = useState("");
 
+    const isUserRole = user?.role === "user";
+
     const fetchData = async () => {
+        // Users fetch only their own assignments; can't access /user or /case endpoints
+        if (isUserRole) {
+            const assignmentsData = await api.get<Assignment[]>("/assignment/my-assignments");
+            return { assignmentsData, casesData: [] as Case[], usersData: [] as User[] };
+        }
         const [assignmentsData, casesData, usersData] = await Promise.all([
             api.get<Assignment[]>("/assignment"),
             api.get<Case[]>("/case"),
@@ -23,9 +33,10 @@ export default function AssignmentsPage() {
     };
 
     const { data, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ["assignments", "cases", "users"],
+        queryKey: ["assignments", "cases", "users", user?.role],
         queryFn: fetchData,
-        staleTime: 300000
+        staleTime: 300000,
+        enabled: !!user,
     })
 
     const assignments = data?.assignmentsData ?? [];
@@ -95,20 +106,23 @@ export default function AssignmentsPage() {
                     <Badge variant="outline" className="text-xs whitespace-nowrap">
                         {assignment.createdAt ? new Date(assignment.createdAt).toLocaleDateString() : 'Active'}
                     </Badge>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 hover:text-destructive group-hover:opacity-100 opacity-0 transition"
-                        onClick={() => handleRemove(assignment._id)}
-                    >
-                        <Trash2 className="h-3 w-3" />
-                    </Button>
+                    {user?.role === "admin" && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 hover:text-destructive group-hover:opacity-100 opacity-0 transition"
+                            onClick={() => handleRemove(assignment._id)}
+                        >
+                            <Trash2 className="h-3 w-3" />
+                        </Button>
+                    )}
                 </div>
             </div>
         );
     };
 
     return (
+        <PrivateRoute allowedRoles={["admin", "judge", "user"]}>
         <div className="space-y-8 relative">
             <div className="absolute inset-0 -z-10 pointer-events-none">
                 <div className="absolute top-8 left-6 h-40 w-40 bg-sky-400/15 blur-3xl opacity-50" />
@@ -116,8 +130,8 @@ export default function AssignmentsPage() {
             </div>
             <div className="flex items-start justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Case Assignments</h2>
-                    <p className="text-muted-foreground">Link users to cases efficiently.</p>
+                    <h2 className="text-3xl font-bold tracking-tight">{isUserRole ? 'My Assignments' : 'Case Assignments'}</h2>
+                    <p className="text-muted-foreground">{isUserRole ? 'Cases assigned to you.' : 'Link users to cases efficiently.'}</p>
                 </div>
                 <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur">
                     <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -126,51 +140,53 @@ export default function AssignmentsPage() {
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
-                <Card className="md:col-span-1 border border-border/70 bg-card/85 backdrop-blur shadow-lg">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Plus className="h-4 w-4" /> New Assignment
-                        </CardTitle>
-                        <CardDescription>Assign a User to a Case</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Select Case</label>
-                            <select
-                                value={selectedCase}
-                                onChange={(e) => setSelectedCase(e.target.value)}
-                                className="flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                {user?.role === "admin" && (
+                    <Card className="md:col-span-1 border border-border/70 bg-card/85 backdrop-blur shadow-lg">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Plus className="h-4 w-4" /> New Assignment
+                            </CardTitle>
+                            <CardDescription>Assign a User to a Case</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Select Case</label>
+                                <select
+                                    value={selectedCase}
+                                    onChange={(e) => setSelectedCase(e.target.value)}
+                                    className="flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="">Choose a case...</option>
+                                    {cases.map(c => (
+                                        <option key={c._id} value={c._id}>{c.caseTitle}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Select User</label>
+                                <select
+                                    value={selectedUser}
+                                    onChange={(e) => setSelectedUser(e.target.value)}
+                                    className="flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="">Choose a user...</option>
+                                    {users.filter(u => u.role === "judge" || u.role === "user").map(u => (
+                                        <option key={u._id} value={u._id}>{u.name} ({u.role})</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <Button
+                                className="w-full mt-4 bg-primary hover:bg-primary/90"
+                                onClick={handleAssign}
+                                disabled={!selectedCase || !selectedUser}
                             >
-                                <option value="">Choose a case...</option>
-                                {cases.map(c => (
-                                    <option key={c._id} value={c._id}>{c.caseTitle}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Select User</label>
-                            <select
-                                value={selectedUser}
-                                onChange={(e) => setSelectedUser(e.target.value)}
-                                className="flex h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <option value="">Choose a user...</option>
-                                {users.filter(u => u.role === "judge" || u.role === "user").map(u => (
-                                    <option key={u._id} value={u._id}>{u.name} ({u.role})</option>
-                                ))}
-                            </select>
-                        </div>
-                        <Button
-                            className="w-full mt-4 bg-primary hover:bg-primary/90"
-                            onClick={handleAssign}
-                            disabled={!selectedCase || !selectedUser}
-                        >
-                            <CheckCircle className="mr-2 h-4 w-4" /> Assign Now
-                        </Button>
-                    </CardContent>
-                </Card>
+                                <CheckCircle className="mr-2 h-4 w-4" /> Assign Now
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
 
-                <Card className="md:col-span-2 border border-border/70 bg-card/85 backdrop-blur shadow-lg">
+                <Card className={`border border-border/70 bg-card/85 backdrop-blur shadow-lg ${user?.role === 'admin' ? 'md:col-span-2' : 'md:col-span-3'}`}>
                     <CardHeader>
                         <CardTitle>Active Assignments</CardTitle>
                         <CardDescription>{assignments.length} total assignments</CardDescription>
@@ -195,5 +211,6 @@ export default function AssignmentsPage() {
                 </Card>
             </div>
         </div>
+        </PrivateRoute>
     );
 }

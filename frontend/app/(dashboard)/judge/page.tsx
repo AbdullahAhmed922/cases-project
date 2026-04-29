@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { User } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUsers } from "@/lib/api";
+import { PrivateRoute } from "@/components/privateRoute";
 
 export default function JudgePage() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +37,7 @@ export default function JudgePage() {
     }
 
     return (
+        <PrivateRoute allowedRoles={["admin", "judge"]}>
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
@@ -107,5 +109,6 @@ export default function JudgePage() {
                 </div>
             )}
         </div>
+        </PrivateRoute>
     );
 }

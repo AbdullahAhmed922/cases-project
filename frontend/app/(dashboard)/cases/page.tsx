@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateCaseModal } from "@/components/modals/CreateCaseModal";
-import { api } from "@/lib/api";
-import { Case, CreateCaseDto } from "@/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchCases } from "@/lib/api";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { fetchCases, fetchMyCases, api } from "@/lib/api";
+import { PrivateRoute } from "@/components/privateRoute";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function CasesPage() {
+    const { user } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState<Case | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -35,9 +36,13 @@ export default function CasesPage() {
     //     fetchCases();
     // }, []);
 
+    const isUserRole = user?.role === "user";
+    const queryKey = isUserRole ? ["cases", "my-cases"] : ["cases"];
+    const queryFn = isUserRole ? fetchMyCases : fetchCases;
+
     const { data = [], isLoading, isError, error } = useQuery<Case[]>({
-        queryKey: ["cases"],
-        queryFn: fetchCases,
+        queryKey,
+        queryFn,
         staleTime: 300000
     })
 
@@ -53,16 +58,16 @@ export default function CasesPage() {
     const { mutate } = useMutation<Case, Error, CreateCaseDto>({
         mutationFn: (data: CreateCaseDto) => api.post<Case>("/case", data),
         onSuccess: (newCase: Case) => {
-            queryClient.setQueryData<Case[]>(['cases'], (oldCases) => {
+            queryClient.setQueryData<Case[]>(queryKey, (oldCases) => {
                 return oldCases ? [...oldCases, newCase] : [newCase];
             })
         }
     });
 
     const handleStatusChange = useMutation<Case, Error, { caseId: string, newStatus: string }>({
-        mutationFn: ({ caseId, newStatus }: { caseId: string, newStatus: string }) => api.patch<Case>(`/case/${caseId}`, { status: newStatus }),
+        mutationFn: ({ caseId, newStatus }: { caseId: string, newStatus: string }) => api.patch<Case>(`/case/${caseId}/status`, { status: newStatus }),
         onSuccess: (updateCase: Case) => {
-            queryClient.setQueryData<Case[]>(['cases'], (oldcases) => {
+            queryClient.setQueryData<Case[]>(queryKey, (oldcases) => {
                 return oldcases ? oldcases.map(c => c._id === updateCase._id ? updateCase : c) : [updateCase];
             })
             setSelectedCase(updateCase)
@@ -108,6 +113,7 @@ export default function CasesPage() {
     // })
 
     return (
+        <PrivateRoute allowedRoles={["admin", "judge", "user"]}>
         <div className="space-y-8">
             <CreateCaseModal
                 isOpen={isModalOpen}
@@ -116,12 +122,14 @@ export default function CasesPage() {
             />
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Cases</h2>
-                    <p className="text-muted-foreground">Manage ongoing and past legal cases.</p>
+                    <h2 className="text-3xl font-bold tracking-tight">{isUserRole ? 'My Cases' : 'Cases'}</h2>
+                    <p className="text-muted-foreground">{isUserRole ? 'View and manage cases assigned to you.' : 'Manage ongoing and past legal cases.'}</p>
                 </div>
-                <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setIsModalOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" /> Create Case
-                </Button>
+                {(user?.role === "admin" || user?.role === "user") && (
+                    <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setIsModalOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" /> Create Case
+                    </Button>
+                )}
             </div>
             {isLoading ? (
                 <div className="p-10 text-center animate-pulse">Loading cases...</div>
@@ -265,5 +273,6 @@ export default function CasesPage() {
                 </div>
             )}
         </div>
+        </PrivateRoute>
     );
 }

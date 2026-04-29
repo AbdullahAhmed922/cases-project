@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { CaseService } from './case.service';
 import { UpdateCaseDto } from './dto/update-case.dto';
 import { CreateCaseDto } from './dto/create-case.dto';
@@ -16,6 +16,13 @@ export class CaseController {
     @Roles(ROLE.ADMIN, ROLE.JUDGE, ROLE.USER)
     findAll() {
         return this.caseService.findAll();
+    }
+
+    @Get('my-cases')
+    @Roles(ROLE.USER)
+    findMyCases(@Req() req: any) {
+        const user = req.user as { userId: string; email: string; role: string };
+        return this.caseService.findByUserId(user.userId);
     }
 
     @Get(':id')

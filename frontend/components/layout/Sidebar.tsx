@@ -4,37 +4,44 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, Briefcase, FileText, Scale } from "lucide-react";
 import { cn } from "@/lib/utilis";
+import { useAuth } from "@/app/context/AuthContext";
 
 const routes = [
     {
         label: "Dashboard",
         icon: LayoutDashboard,
         href: "/",
+        allowedRoles: ["admin", "judge", "user"],
     },
     {
         label: "Cases",
         icon: Briefcase,
         href: "/cases",
+        allowedRoles: ["admin", "judge", "user"],
     },
     {
         label: "Assignments",
         icon: FileText,
         href: "/assignments",
+        allowedRoles: ["admin", "judge", "user"],
     },
     {
         label: "Users",
         icon: Users,
         href: "/users",
+        allowedRoles: ["admin", "judge"],
     },
     {
         label: "Judge",
         icon: Scale,
         href: "/judge",
+        allowedRoles: ["admin", "judge"],
     },
 ];
 
 export function Sidebar() {
     const pathname = usePathname();
+    const { user } = useAuth();
 
     const isActive = (href: string) => pathname === href;
 
@@ -62,6 +69,9 @@ export function Sidebar() {
                 </div>
                 <nav className="space-y-0.5 px-3">
                     {routes.map((route) => {
+                        if (user && route.allowedRoles && !route.allowedRoles.includes(user.role)) {
+                            return null;
+                        }
                         const active = isActive(route.href);
                         return (
                             <Link

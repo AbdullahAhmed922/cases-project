@@ -9,8 +9,11 @@ import { CreateUserModal } from "@/components/modals/CreateUserModal";
 import { api, fetchUsers } from "@/lib/api";
 import { User, CreateUserDto } from "@/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PrivateRoute } from "@/components/privateRoute";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function UsersPage() {
+    const { user } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const queryClient = useQueryClient();
@@ -82,23 +85,28 @@ export default function UsersPage() {
     // }
 
     return (
-        <div className="space-y-8">
-            <CreateUserModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSubmit={mutate}
-            />
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Users</h2>
-                    <p className="text-muted-foreground">Manage system users and their roles.</p>
+        <PrivateRoute allowedRoles={["admin", "judge"]}>
+            <div className="space-y-8">
+                {user?.role === "admin" && (
+                    <CreateUserModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        onSubmit={mutate}
+                    />
+                )}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight">Users</h2>
+                        <p className="text-muted-foreground">Manage system users and their roles.</p>
+                    </div>
+                    {user?.role === "admin" && (
+                        <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setIsModalOpen(true)}>
+                            <Plus className="mr-2 h-4 w-4" /> Add User
+                        </Button>
+                    )}
                 </div>
-                <Button className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setIsModalOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" /> Add User
-                </Button>
-            </div>
 
-            <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                 <div className="relative flex-1 max-w-sm">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -140,41 +148,42 @@ export default function UsersPage() {
                                             <td colSpan={4} className="p-8 text-center text-muted-foreground">No users found.</td>
                                         </tr>
                                     ) : (
-                                        filteredUsers.map((user) => (
-                                            <tr key={user._id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                        filteredUsers.map((u) => (
+                                            <tr key={u._id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                                                 <td className="p-4 align-middle font-medium">
                                                     <div className="flex items-center gap-3">
                                                         <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                                                            {user.name.charAt(0)}
+                                                            {u.name.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div>{user.name}</div>
-                                                            <div className="text-xs text-muted-foreground md:hidden">{user.email}</div>
+                                                            <div>{u.name}</div>
+                                                            <div className="text-xs text-muted-foreground md:hidden">{u.email}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="p-4 align-middle">
-                                                    <Badge variant={user.role === 'admin' ? 'error' : user.role === 'judge' ? 'default' : 'outline'}>
-                                                        {user.role}
+                                                    <Badge variant={u.role === 'admin' ? 'error' : u.role === 'judge' ? 'default' : 'outline'}>
+                                                        {u.role}
                                                     </Badge>
                                                 </td>
                                                 <td className="p-4 align-middle">
                                                     <div className="flex flex-col gap-1 text-muted-foreground">
                                                         <div className="flex items-center gap-2 text-xs">
-                                                            <Mail className="h-3 w-3" /> {user.email}
+                                                            <Mail className="h-3 w-3" /> {u.email}
                                                         </div>
-                                                        {user.phone && (
+                                                        {u.phone && (
                                                             <div className="flex items-center gap-2 text-xs">
-                                                                <Phone className="h-3 w-3" /> {user.phone}
+                                                                <Phone className="h-3 w-3" /> {u.phone}
                                                             </div>
                                                         )}
                                                     </div>
                                                 </td>
                                                 <td className="p-4 align-middle text-right">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteMutation.mutate(user._id)}>
-                                                        <Trash2 className="h-4 w-4" />
-
-                                                    </Button>
+                                                    {user?.role === "admin" && (
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteMutation.mutate(u._id)}>
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))
@@ -186,5 +195,6 @@ export default function UsersPage() {
                 </div>
             </div>
         </div>
+        </PrivateRoute>
     );
 }
