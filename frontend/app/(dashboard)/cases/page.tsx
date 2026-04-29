@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CreateCaseModal } from "@/components/modals/CreateCaseModal";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { fetchCases, fetchMyCases, api } from "@/lib/api";
+import { Case, CreateCaseDto } from "@/types";
 import { PrivateRoute } from "@/components/privateRoute";
 import { useAuth } from "@/app/context/AuthContext";
 
